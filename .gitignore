@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# Environments
+.env
+.venv
+venv/
+conda-meta/
+
+# Logs
+*.log
+*.out
+*.err
+slurm-*.out
+*_*.out
+*_*.err
+
+# Large outputs
+outputs/
+results/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.mp4
+*.gif
+*.png
+*.jpg
+*.jpeg
+*.tar.gz
+*.zip
+
+# Cache
+.cache/
+.DS_Store

@@ -1,0 +1,8 @@
+paths:
+  ditflow_repo: /home/ids/bjia-25/project/ditflow
+  wan22_repo: /home/ids/bjia-25/project/Wan2.2
+  wan22_ckpt: /home/ids/bjia-25/project/Wan2.2/Wan2.2-TI2V-5B
+
+  ditflow_reference_amf_adj: /home/ids/bjia-25/project/ditflow/results/amf_reference_vis/block_15_attn1_processor/amf_adj.pt
+
+  output_root: /home/ids/bjia-25/project/amf_motion_eval/outputs
