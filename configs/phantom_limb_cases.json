@@ -1,0 +1,39 @@
+{
+  "default_block_id": 15,
+  "default_size": "1280*704",
+  "cases": [
+    {
+      "case_id": "hard_01_cartwheel",
+      "video_path": "/home/ids/bjia-25/project/Wan2.2/outputs/hard_prompts/hard_01_cartwheel.mp4",
+      "frame_t": 51,
+      "frame_num": 57,
+      "bboxes": {
+        "normal_source": [717, 334, 902, 445],
+        "normal_target": [748, 342, 945, 454],
+        "phantom_target": [690, 350, 802, 447]
+      }
+    },
+    {
+      "case_id": "hard_02_high_side_kick",
+      "video_path": "/home/ids/bjia-25/project/Wan2.2/outputs/hard_prompts/hard_02_high_side_kick.mp4",
+      "frame_t": 8,
+      "frame_num": 13,
+      "bboxes": {
+        "normal_source": [469, 234, 664, 405],
+        "normal_target": [484, 232, 674, 409],
+        "phantom_target": [430, 208, 548, 304]
+      }
+    },
+    {
+      "case_id": "hard_03_jump_landing",
+      "video_path": "/home/ids/bjia-25/project/Wan2.2/outputs/hard_prompts/hard_03_jump_landing.mp4",
+      "frame_t": 48,
+      "frame_num": 57,
+      "bboxes": {
+        "normal_source": [650, 436, 728, 578],
+        "normal_target": [653, 436, 732, 579],
+        "phantom_target": [623, 438, 686, 576]
+      }
+    }
+  ]
+}
