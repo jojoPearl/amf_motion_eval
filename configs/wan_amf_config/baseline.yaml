@@ -1,0 +1,29 @@
+mode: baseline
+prompt: "A full-body video of a single person performing an intense cartwheel from left to right, arms and legs fully extended, plain background, fixed camera, realistic human motion."
+action: cartwheel
+seed: 205
+sampling_steps: 50
+frame_num: 121
+size: 1280x704
+output_dir: outputs/amf_selection
+
+selection_steps: [4, 6, 8, 11, 15]
+lookahead_steps: 3
+beam_size: 2
+candidates_per_beam: 3
+branch_noise_scale: 0.4
+lambda_motion: 0.5
+min_motion_ratio: 0.9
+max_motion_ratio: 1.1
+
+ratio_tolerance: 0.025
+temporal_smooth_noise: true
+temporal_smooth_kernel: 5
+amf_block_id: 15
+max_amf_triplets: 4
+motion_temp: 2.0
+head_reduce: mean_qk
+
+offload_model: true
+t5_cpu: false
+verbose: true
