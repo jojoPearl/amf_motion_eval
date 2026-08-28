@@ -14,7 +14,7 @@ set -euo pipefail
 PROJECT_ROOT=/home/ids/bjia-25/project
 AMF_ROOT=$PROJECT_ROOT/amf_motion_eval
 
-PROMPT_FILE=$AMF_ROOT/configs/human_motion_prompts.jsonl
+PROMPT_FILE=$AMF_ROOT/configs/prompt_intense.jsonl
 OUTPUT_DIR=$AMF_ROOT/outputs/hunyuan_score_results1
 
 source /home/ids/bjia-25/miniconda3/etc/profile.d/conda.sh
@@ -31,8 +31,10 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # =========================
 # SEEDS=(205 1024 2026 4096 8901)
 SEEDS=(205 1024)
-HEIGHT=576
-WIDTH=384
+# Hunyuan requires both dimensions to be divisible by 16.
+# 704x1280 is the nearest valid portrait resolution to 720x1280.
+HEIGHT=1280
+WIDTH=704
 # =========================
 
 CONFIG=$(mktemp --tmpdir hunyuan_baseline_batch.XXXXXX.json)
