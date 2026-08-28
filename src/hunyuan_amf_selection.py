@@ -6,6 +6,8 @@ import json
 import logging
 import math
 import os
+
+import numpy as np
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,7 +39,7 @@ class AMFSearchConfig:
     # Equivalent to Wan steps [4, 6, 8, 11, 15] out of 50.
     select_step_ratios: Tuple[float, ...] = (0.08, 0.12, 0.16, 0.22, 0.30)
 
-    # Small, sigma-aware branch perturbation. 0.40 was too destructive.
+    # Sigma-aware branch perturbation.
     branch_noise_scale: float = 0.05
     temporal_smooth_noise: bool = True
     temporal_smooth_kernel: int = 5
@@ -167,11 +169,6 @@ def _make_candidate_inputs(
         candidates.append((latents + scale.to(latents.dtype) * noise).detach())
 
     return candidates
-
-
-# ---------------------------------------------------------------------
-# AMF / AMF-TV: preserved from the current Wan AMF-QK route
-# ---------------------------------------------------------------------
 
 def _reshape_qk(
     q: Tensor,
@@ -603,10 +600,28 @@ def generate_hunyuan_amf(
     # ---------------------------------------------------------
     # 2. Timesteps
     # ---------------------------------------------------------
-    pipe.scheduler.set_timesteps(
-        num_inference_steps,
-        device=device,
-    )
+    # Match the official diffusers HunyuanVideoPipeline schedule exactly.
+    # In diffusers 0.32.x the pipeline constructs a linear sigma schedule before
+    # calling set_timesteps. Calling set_timesteps(num_inference_steps) directly
+    # can produce a different denoising trajectory from the baseline pipeline.
+    sigma_schedule = np.linspace(1.0, 0.0, num_inference_steps + 1)[:-1]
+    set_timestep_params = inspect.signature(pipe.scheduler.set_timesteps).parameters
+    if "sigmas" in set_timestep_params:
+        pipe.scheduler.set_timesteps(
+            sigmas=sigma_schedule,
+            device=device,
+        )
+    else:
+        logging.warning(
+            "[hunyuan-amf] scheduler %s has no sigmas= argument; falling back "
+            "to set_timesteps(num_inference_steps). Exact baseline alignment is "
+            "not guaranteed.",
+            pipe.scheduler.__class__.__name__,
+        )
+        pipe.scheduler.set_timesteps(
+            num_inference_steps,
+            device=device,
+        )
     timesteps = pipe.scheduler.timesteps
     num_inference_steps = len(timesteps)
 
@@ -644,6 +659,13 @@ def generate_hunyuan_amf(
         if cfg.beam_size > 0 and cfg.candidates_per_beam > 0
         else []
     )
+
+    identity_mode = cfg.beam_size == 1 and cfg.candidates_per_beam == 1
+    if identity_mode:
+        logging.info(
+            "[hunyuan-amf] identity sanity mode: beam=1 candidates=1; "
+            "using the untouched baseline denoising trajectory."
+        )
 
     logging.info(
         "[hunyuan-amf] selection steps=%s / total=%s",
@@ -787,6 +809,26 @@ def generate_hunyuan_amf(
                     )
 
                 beams = next_beams
+                progress_bar.update()
+                continue
+
+            # There is nothing to select in identity mode. Avoid the extra Q/K
+            # scoring forward so this path follows the baseline denoising loop.
+            if identity_mode:
+                beam = beams[0]
+                z_next = scheduler_step(
+                    beam.latents,
+                    beam.scheduler,
+                    step_i,
+                )
+                beams = [
+                    StatefulBeam(
+                        latents=z_next,
+                        scheduler=beam.scheduler,
+                        cumulative_reward=beam.cumulative_reward,
+                        history=beam.history,
+                    )
+                ]
                 progress_bar.update()
                 continue
 
